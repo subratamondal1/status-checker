@@ -60,9 +60,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.__clientidsecretname__ }}
-          tenant-id: ${{ secrets.__tenantidsecretname__ }}
-          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1B4ACFD698A04EB3BDF6F29E40E63CC7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_DADFC986786A4559832CA9075DCA1CDF }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4F3F9B9966F34218B567B503D1C75141 }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -71,3 +71,4 @@ jobs:
           app-name: 'status-checker-bknd'
           slot-name: 'Production'
           package: .
+          
