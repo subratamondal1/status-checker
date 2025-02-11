@@ -10,6 +10,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import enrollmentRoutes from './routes/enrollmentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import { authenticateToken, validateToken } from './middleware/auth.js';
 
 dotenv.config();
 
@@ -148,6 +149,9 @@ app.get('/api/admin/stats', auth, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// Add token validation route
+app.get('/api/validate-token', validateToken);
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)

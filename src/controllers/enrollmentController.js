@@ -22,9 +22,10 @@ export const searchEnrollment = async (req, res) => {
 };
 
 // Update gift status and upload image
+// Update gift status and upload image
 export const updateGiftStatus = async (req, res) => {
   try {
-    const { enrollmentNo } = req.body;
+    const { enrollmentNo, tokenNumber } = req.body;
     const image = req.file;
 
     if (!image) {
@@ -41,7 +42,7 @@ export const updateGiftStatus = async (req, res) => {
     if (enrollment.isGifted) {
       return res.status(400).json({ 
         message: 'Gift already distributed',
-        giftedBy: enrollment.giftedBy ? await User.findById(enrollment.giftedBy).select('username') : null,
+        giftedBy: enrollment.giftedBy ? await User.findById(enrollment.giftedBy).select('tokenNumber') : null,
         giftedAt: enrollment.giftedAt
       });
     }
@@ -54,6 +55,7 @@ export const updateGiftStatus = async (req, res) => {
     enrollment.giftedBy = req.user._id;
     enrollment.giftedAt = new Date();
     enrollment.cardImage = imageUrl;
+    enrollment.tokenNumber = tokenNumber; // Save token number
 
     await enrollment.save();
 
@@ -61,18 +63,18 @@ export const updateGiftStatus = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $inc: { giftedCount: 1 } });
 
     res.json({ 
-      message: 'Gift status updated successfully', 
+      message: 'Status updated successfully', 
       enrollment: {
         "enrollment no": enrollment["enrollment no"],
         name: enrollment.name,
         isGifted: enrollment.isGifted,
-        giftedBy: req.user.username,
+        tokenNumber, // Include token number in the response
         giftedAt: enrollment.giftedAt,
         cardImage: enrollment.cardImage
       }
     });
   } catch (error) {
-    console.error('Update gift status error:', error);
+    console.error('Updating status error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

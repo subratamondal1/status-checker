@@ -39,30 +39,50 @@ export const createUser = async (req, res) => {
 // Get all users with their gift statistics
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: 'user' }, '-password');
-    
-    // Get detailed gift information for each user
-    const usersWithStats = await Promise.all(users.map(async (user) => {
-      const giftedEnrollments = await Enrollment.find({ 
-        giftedBy: user._id,
-        isGifted: true 
-      }).select('enrollment no name giftedAt');
+    // Only fetch "user" role, or remove $match if you want all
+    const users = await User.aggregate([
+      { $match: { role: 'user' } },
+      {
+        $lookup: {
+          from: 'enrollments',            // collection name in Mongo
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$giftedBy', '$$userId'] },
+                    { $eq: ['$isGifted', true] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: 'giftedEnrollments'
+        }
+      },
+      {
+        $project: {
+          username: 1,
+          role: 1,
+          giftedCount: 1,
+          // Now select only fields you want from giftedEnrollments
+          'giftedEnrollments.enrollment no': 1,
+          'giftedEnrollments.name': 1,
+          'giftedEnrollments.cardImage': 1,
+          'giftedEnrollments.giftedAt': 1,
+          'giftedEnrollments.tokenNumber': 1,
+        }
+      }
+    ]);
 
-      return {
-        _id: user._id,
-        username: user.username,
-        role: user.role,
-        giftedCount: giftedEnrollments.length,
-        giftedEnrollments
-      };
-    }));
-
-    res.json(usersWithStats);
+    res.json(users);
   } catch (error) {
-    console.error('Get users error:', error);
+    console.error('Get all users error:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
 
 // Get dashboard statistics
 export const getDashboardStats = async (req, res) => {

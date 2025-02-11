@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
   giftedCount: {
     type: Number,
     default: 0
+  },
+  tokenNumber: {
+    type: Number,
+    default: null
   }
 }, {
   timestamps: true

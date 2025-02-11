@@ -54,6 +54,9 @@ const enrollmentSchema = new mongoose.Schema({
   cardImage: {
     type: String,
     default: null
+  },
+  tokenNumber: {
+    type: Number   // Ensure this field is in the schema
   }
 }, {
   timestamps: true
